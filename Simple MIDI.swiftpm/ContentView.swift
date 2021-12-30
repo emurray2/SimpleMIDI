@@ -1,5 +1,6 @@
 import SwiftUI
 import AudioKit
+let engine = AudioEngine()
 struct ContentView: View {
     @State var isPlaying: Bool = false
     @State var browseFiles = false

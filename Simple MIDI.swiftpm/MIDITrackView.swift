@@ -5,6 +5,7 @@ import SwiftUI
 struct NoteGroup: UIViewRepresentable {
     @Binding var isPlaying: Bool
     let sequencer: AppleSequencer
+    let sampler: MIDISampler
     let noteMap: MIDIFileTrackNoteMap
     let trackHeight: CGFloat
     let noteZoom: CGFloat
@@ -20,6 +21,14 @@ struct NoteGroup: UIViewRepresentable {
         if isPlaying {
             uiView.frame.origin.x = 0.0
             var tempo = 0.0
+            engine.output = Reverb(sampler, dryWetMix: 0.2)
+            sequencer.setGlobalMIDIOutput(sampler.midiIn)
+            do {
+                try sampler.loadSoundFont("UprightPianoKW-20190703", preset: 0, bank: 0)
+                try engine.start()
+            } catch let err {
+                print(err.localizedDescription)
+            }
             if sequencer.allTempoEvents.isNotEmpty {
                 tempo = sequencer.allTempoEvents[0].1
             } else {
@@ -88,10 +97,12 @@ public struct MIDITrackView: View {
         VStack {
             ScrollView {
                 let sequencer = AppleSequencer(fromURL: fileURL)
+                let sampler = MIDISampler()
                 ForEach(MIDIFile(url: fileURL).tracks.indices, id: \.self) { number in
                     let noteMap = MIDIFileTrackNoteMap(midiFile: MIDIFile(url: fileURL), trackNumber: number)
                     NoteGroup(isPlaying: $isPlaying,
                               sequencer: sequencer,
+                              sampler: sampler,
                               noteMap: noteMap,
                               trackHeight: trackHeight,
                               noteZoom: noteZoom)

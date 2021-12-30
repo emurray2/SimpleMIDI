@@ -10,7 +10,7 @@ import AppleProductTypes
 let package = Package(
     name: "Simple MIDI",
     platforms: [
-        .iOS("15.2")
+        .iOS("14.0")
     ],
     products: [
         .iOSApplication(
@@ -31,7 +31,8 @@ let package = Package(
                 .landscapeRight,
                 .landscapeLeft,
                 .portraitUpsideDown(.when(deviceFamilies: [.phone]))
-            ]
+            ],
+            additionalInfoPlistContentFilePath: "AppSettings.plist"
         )
     ],
     dependencies: [
@@ -44,6 +45,7 @@ let package = Package(
                 .product(name: "AudioKit", package: "AudioKit")
             ],
             path: ".",
+            exclude: ["AppSettings.plist"],
             resources: [
                 .process("Resources")
             ]
