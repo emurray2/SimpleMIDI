@@ -10,7 +10,7 @@ import AppleProductTypes
 let package = Package(
     name: "Simple MIDI",
     platforms: [
-        .iOS("15.2")
+        .iOS("14.0")
     ],
     products: [
         .iOSApplication(
