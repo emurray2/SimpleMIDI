@@ -28,9 +28,9 @@ let package = Package(
             ],
             supportedInterfaceOrientations: [
                 .portrait,
-                .portraitUpsideDown,
                 .landscapeRight,
-                .landscapeLeft
+                .landscapeLeft,
+                .portraitUpsideDown(.when(deviceFamilies: [.pad]))
             ],
             additionalInfoPlistContentFilePath: "Info.plist"
         )
