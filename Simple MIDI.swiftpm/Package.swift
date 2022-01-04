@@ -18,7 +18,7 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "io.auraaudio.simple-midi",
             teamIdentifier: "6CV59M265C",
-            displayVersion: "1.0.0",
+            displayVersion: "1.1.0",
             bundleVersion: "4",
             iconAssetName: "AppIcon",
             accentColorAssetName: "AccentColor",
@@ -32,7 +32,7 @@ let package = Package(
                 .landscapeLeft,
                 .portraitUpsideDown(.when(deviceFamilies: [.phone]))
             ],
-            additionalInfoPlistContentFilePath: "AppSettings.plist"
+            additionalInfoPlistContentFilePath: "Info.plist"
         )
     ],
     dependencies: [
@@ -45,7 +45,7 @@ let package = Package(
                 .product(name: "AudioKit", package: "AudioKit")
             ],
             path: ".",
-            exclude: ["AppSettings.plist"],
+            exclude: ["Info.plist"],
             resources: [
                 .process("Resources")
             ]
