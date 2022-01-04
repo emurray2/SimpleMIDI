@@ -1,24 +1,27 @@
 import SwiftUI
 import AudioKit
-let engine = AudioEngine()
 struct ContentView: View {
-    @State var isPlaying: Bool = false
-    @State var browseFiles = false
-    @State var fileURL: URL = URL(fileURLWithPath: "")
+    @StateObject var trackPlayer = TrackPlayer()
+    @State var fileURL: URL?
     @State var fileLoading: Bool = false
+    @State var isPlaying = false
     var body: some View {
         VStack {
-            if fileLoading {
-                
-            } else {
-                GeometryReader { geometry in
-                    MIDITrackView(isPlaying: $isPlaying, trackWidth: geometry.size.width, trackHeight: 200.0, fileURL: $fileURL)
+            GeometryReader { geometry in
+                ScrollView {
+                    if let fileURL = fileURL {
+                        ForEach(MIDIFile(url: fileURL).tracks.indices, id: \.self) { number in
+                            MIDITrackView(fileURL: $fileURL, trackNumber: number, trackWidth: geometry.size.width, trackHeight: 200.0)
+                                .background(Color.primary)
+                                .cornerRadius(10.0)
+                        }
+                    }
                 }
             }
             Button { 
                 isPlaying.toggle()
             } label: { 
-                Image(systemName: isPlaying ? "play.fill" : "play")
+                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(minWidth: 50, idealWidth: 70, maxWidth: 70, minHeight: 50, idealHeight: 70, maxHeight: 70, alignment: .center)
@@ -26,9 +29,8 @@ struct ContentView: View {
             }
             .padding()
             Button(action: {
-                browseFiles.toggle()
+                fileLoading.toggle()
                 isPlaying = false
-                fileLoading = true
             },
                    label: {
                 VStack {
@@ -43,25 +45,43 @@ struct ContentView: View {
                         .foregroundColor(.primary)
                 }
             })
-                .fileImporter(isPresented: $browseFiles,
-                              allowedContentTypes: [.midi]) { res in
-                    do {
-                        fileURL = try res.get()
-                        if fileURL.startAccessingSecurityScopedResource() {
-                        }
-                    } catch {
-                        print(error.localizedDescription)
-                    }
-                    fileLoading = false
+        }
+        .fileImporter(isPresented: $fileLoading, 
+                      allowedContentTypes: [.midi], 
+                      onCompletion: { res in
+            switch res {
+            case .success(let url):
+                fileURL = url
+                if url.startAccessingSecurityScopedResource() {
                 }
-        }
-        .onDisappear {
-            fileURL.stopAccessingSecurityScopedResource()
-        }
-        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-            isPlaying = false
-        }
-        .onRotate { _ in
-        }
+                trackPlayer.loadSequencerFile(fileURL: fileURL!)
+            case.failure:
+                print("file failed to load")
+            }
+        })
+        .onChange(of: fileLoading, perform: { newValue in
+            if newValue == true {
+                trackPlayer.stop()
+                trackPlayer.sequencer.rewind()
+                fileURL = nil
+            } else {
+            }
+        })
+        .onChange(of: isPlaying, perform: { newValue in
+            if newValue == true {
+                trackPlayer.play()
+            } else {
+                trackPlayer.stop()
+            }
+        })
+        .onAppear(perform: { 
+            trackPlayer.startEngine()
+        })
+        .onDisappear(perform: { 
+            fileURL!.stopAccessingSecurityScopedResource()
+            trackPlayer.stop()
+            trackPlayer.stopEngine()
+        })
+        .environmentObject(trackPlayer)
     }
 }
