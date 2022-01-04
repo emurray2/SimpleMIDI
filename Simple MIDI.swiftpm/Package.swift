@@ -30,7 +30,7 @@ let package = Package(
                 .portrait,
                 .landscapeRight,
                 .landscapeLeft,
-                .portraitUpsideDown(.when(deviceFamilies: [.phone]))
+                .portraitUpsideDown
             ],
             additionalInfoPlistContentFilePath: "Info.plist"
         )
